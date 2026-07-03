@@ -1,4 +1,4 @@
-import { PuppeteerCrawler, Configuration } from 'crawlee';
+import { CheerioCrawler, Configuration } from 'crawlee';
 import { cleanHtml, CleanedPage } from './cleaner.service.js';
 import { updateJob, getJob } from '../store/jobStore.js';
 import { logger } from '../utils/logger.js';
@@ -10,8 +10,7 @@ export interface CrawledPage extends CleanedPage {
 /**
  * Executes a scoped, polite crawl of a single domain starting from seed URL.
  * Uses in-memory storage (persistStorage: false) to avoid filesystem race
- * conditions and the SDK_SESSION_POOL_STATE.json missing-file error that
- * occurs when process.env.CRAWLEE_STORAGE_DIR is mutated between crawls.
+ * conditions and the SDK_SESSION_POOL_STATE.json missing-file error.
  */
 export async function crawlSite(
   jobId: string,
@@ -27,31 +26,23 @@ export async function crawlSite(
   const seenUrls = new Set<string>([startUrl]);
 
   // Use a per-crawler Configuration with persistStorage: false so Crawlee
-  // never writes to disk. This avoids all missing-file errors between crawls
-  // and removes the need to clean up storage directories manually.
+  // never writes to disk.
   const crawlerConfig = new Configuration({
     persistStorage: false,
     purgeOnStart: false
   });
 
-  const crawler = new PuppeteerCrawler(
+  const crawler = new CheerioCrawler(
     {
       maxRequestsPerCrawl: maxPages,
       maxConcurrency: concurrency,
       maxRequestsPerMinute: reqsPerMin,
-      respectRobotsTxtFile: true,
 
-      launchContext: {
-        launchOptions: {
-          args: ['--no-sandbox', '--disable-setuid-sandbox']
-        } as any
-      },
-
-      async requestHandler({ request, page, enqueueLinks }) {
+      async requestHandler({ request, $, enqueueLinks }) {
         const url = request.url;
         const currentDepth = (request.userData?.depth as number) || 0;
 
-        logger.info(`Crawling URL: ${url} at depth ${currentDepth} using Puppeteer`);
+        logger.info(`Crawling URL: ${url} at depth ${currentDepth} using Cheerio`);
 
         // Increment pagesCrawled count in job state
         const currentJob = getJob(jobId);
@@ -63,7 +54,7 @@ export async function crawlSite(
         }
 
         // Clean the raw HTML and extract text
-        const html = await page.content();
+        const html = $.html();
         const cleaned = cleanHtml(html);
         pages.push({
           url,
