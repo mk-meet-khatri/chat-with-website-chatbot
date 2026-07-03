@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What is the price of A Light in the Attic?",
+    "expectedSourceUrl": "a-light-in-the-attic_1000/index.html"
+  },
+  {
+    "question": "Is there a book called Tipping the Velvet?",
+    "expectedSourceUrl": "tipping-the-velvet_999/index.html"
+  },
+  {
+    "question": "How much does the book Soumission cost?",
+    "expectedSourceUrl": "soumission_998/index.html"
+  },
+  {
+    "question": "What is the price of Sharp Objects?",
+    "expectedSourceUrl": "sharp-objects_997/index.html"
+  },
+  {
+    "question": "Find information about the book Sapiens: A Brief History of Humankind",
+    "expectedSourceUrl": "sapiens-a-brief-history-of-humankind_996/index.html"
+  }
+]
